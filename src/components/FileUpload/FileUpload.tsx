@@ -22,7 +22,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileAccepted }) => {
     multiple: false,
   });
 
-  const dropText = isDragActive ? 'Drop the files here ...' : "Drag 'n' drop your file here, or click to select files";
+  const dropText = isDragActive ? 'Drop it like it’s hot…' : 'Drag‘n’drop your file here, or click to select files';
 
   const activeBg = useColorModeValue('gray.100', 'gray.600');
   const borderColor = useColorModeValue(isDragActive ? 'teal.300' : 'gray.300', isDragActive ? 'teal.500' : 'gray.500');
@@ -36,7 +36,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileAccepted }) => {
       bg={isDragActive ? activeBg : 'transparent'}
       _hover={{ bg: activeBg }}
       transition="background-color 0.2s ease"
-      borderRadius={4}
+      borderRadius="lg"
       border="2px dashed"
       borderColor={borderColor}
       {...getRootProps()}

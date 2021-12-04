@@ -12,10 +12,13 @@ import {
   OrderedList,
   ListItem,
   Box,
+  Icon,
 } from '@chakra-ui/react';
+import SEO from '../components/SEO';
 import FileUpload from '../components/FileUpload';
 import pdfToImages from '../lib/pdfToImages';
 import OCRImages from '../lib/OCRImages';
+import { AiFillInfoCircle } from 'react-icons/ai';
 
 const PageContent = styled(Container, {
   baseStyle: {
@@ -29,6 +32,11 @@ const PageContent = styled(Container, {
   },
 });
 
+const pageInfo = {
+  title: 'Scanned PDF to JSON',
+  desc: "Upload a PDF file and we'll convert it to a JSON file with the text on each page.",
+};
+
 const Home = () => {
   const toast = useToast();
 
@@ -39,7 +47,7 @@ const Home = () => {
   const [results, setResults] = useState<Record<string, string>>({});
 
   const handleFileSelect = async (file: File) => {
-    if (file.type !== 'application/pdf') {
+    if (file?.type !== 'application/pdf') {
       toast({ status: 'error', title: 'Invalid file type' });
       return;
     }
@@ -63,21 +71,28 @@ const Home = () => {
   if (!progress.total) {
     return (
       <PageContent>
+        <SEO title={pageInfo.title} desc={pageInfo.desc} imageUrl="/favicon.png" />
         <Heading as="h1" mb={4}>
-          PDF parser
+          Recognise text in your PDF files
         </Heading>
-
-        <Text mb={2}>Upload a pdf file to have it processed:</Text>
-
-        <FileUpload onFileAccepted={handleFileSelect} />
 
         <Box mt={4}>
           <Heading size="md">How it works</Heading>
           <OrderedList>
             <ListItem>Each page of the uploaded PDF file will be converted to a PNG image</ListItem>
             <ListItem>Each PNG image will go through an OCR that will read the text on the screen</ListItem>
-            <ListItem>A lookup for specific words in each text will generate a spreadsheet</ListItem>
+            <ListItem>A JSON file download will be available for you with the contents of each page.</ListItem>
           </OrderedList>
+        </Box>
+
+        <FileUpload onFileAccepted={handleFileSelect} />
+
+        <Box color="blue.500" display="flex" alignItems="center" borderRadius="md">
+          <Icon as={AiFillInfoCircle} mr={2} />
+          <Text as="span">
+            No data about your files is collected or stored. All the processing and text recognition happens on your
+            device.
+          </Text>
         </Box>
       </PageContent>
     );
@@ -86,6 +101,7 @@ const Home = () => {
   if (progress.total === progress.current) {
     return (
       <PageContent>
+        <SEO title="Processing complete!" desc={pageInfo.desc} imageUrl="/favicon.png" />
         <Text pb={2}>Processing complete!</Text>
         <HStack>
           <Button variant="solid" onClick={() => download(JSON.stringify(results), 'results.json')}>
@@ -101,6 +117,12 @@ const Home = () => {
 
   return (
     <PageContent>
+      <SEO
+        title={`${Math.floor((progress.current / progress.total) * 100)}% complete`}
+        desc={pageInfo.desc}
+        imageUrl="/favicon.png"
+      />
+
       <Progress
         w="100%"
         size="xs"
