@@ -1,7 +1,5 @@
-import * as pdfjsLib from 'pdfjs-dist';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useToast } from '@chakra-ui/toast';
-import Tesseract from 'tesseract.js';
 import download from '../lib/download';
 import {
   Progress,
@@ -16,8 +14,8 @@ import {
   Box,
 } from '@chakra-ui/react';
 import FileUpload from '../components/FileUpload';
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.js';
+import pdfToImages from '../lib/pdfToImages';
+import OCRImages from '../lib/OCRImages';
 
 const PageContent = styled(Container, {
   baseStyle: {
@@ -34,52 +32,35 @@ const PageContent = styled(Container, {
 const Home = () => {
   const toast = useToast();
 
-  const [pdf, setPdf] = useState<string | null>(null);
-  const [progress, setProgress] = useState<{ current: number; total: number }>({ current: 0, total: 0 });
-  const [results, setResults] = useState<string[]>([]);
+  const [progress, setProgress] = useState<{ current: number; total: number; type?: 'Processing' | 'Recognising' }>({
+    current: 0,
+    total: 0,
+  });
+  const [results, setResults] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    if (pdf) {
-      pdfjsLib.getDocument(pdf).promise.then(async doc => {
-        for (let i = 0; i < doc.numPages; i++) {
-          const canvas = document.createElement('canvas');
-
-          const page = await doc.getPage(i + 1);
-          const context = canvas.getContext('2d');
-          const viewport = page.getViewport({ scale: 3 });
-          canvas.height = viewport.height;
-          canvas.width = viewport.width;
-
-          setProgress({ current: 0, total: doc.numPages });
-
-          await page.render({
-            canvasContext: context,
-            viewport,
-          }).promise;
-
-          const pagePng = canvas.toDataURL('image/png');
-
-          setProgress({ current: i + 1, total: doc.numPages });
-          await Tesseract.recognize(pagePng, 'isl').then(({ data: { text } }) => {
-            results.push(text);
-          });
-        }
-        setResults(results);
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pdf]);
-
-  const handleFileSelect = (file: File) => {
+  const handleFileSelect = async (file: File) => {
     if (file.type !== 'application/pdf') {
       toast({ status: 'error', title: 'Invalid file type' });
       return;
     }
     const pdfUrl = URL.createObjectURL(file);
-    setPdf(pdfUrl);
+
+    const imageUrls = await pdfToImages(pdfUrl, {
+      scale: 2,
+      onStart: progress => setProgress({ ...progress, total: progress.total * 2, type: 'Processing' }),
+      onProgress: progress => setProgress({ ...progress, total: progress.total * 2, type: 'Processing' }),
+    });
+    const recognisedImages = await OCRImages(imageUrls, {
+      onStart: progress =>
+        setProgress({ current: progress.total + progress.current, total: progress.total * 2, type: 'Recognising' }),
+      onProgress: progress =>
+        setProgress({ current: progress.total + progress.current, total: progress.total * 2, type: 'Recognising' }),
+    });
+
+    setResults(recognisedImages);
   };
 
-  if (!pdf) {
+  if (!progress.total) {
     return (
       <PageContent>
         <Heading as="h1" mb={4}>
@@ -102,7 +83,7 @@ const Home = () => {
     );
   }
 
-  if (progress.total > 0 && progress.total === progress.current) {
+  if (progress.total === progress.current) {
     return (
       <PageContent>
         <Text pb={2}>Processing complete!</Text>
@@ -110,7 +91,7 @@ const Home = () => {
           <Button variant="solid" onClick={() => download(JSON.stringify(results), 'results.json')}>
             Download File
           </Button>
-          <Button variant="outline" onClick={() => setPdf(undefined)}>
+          <Button variant="outline" onClick={() => setProgress({ current: 0, total: 0 })}>
             Upload Another
           </Button>
         </HStack>
@@ -127,7 +108,7 @@ const Home = () => {
         isIndeterminate={!progress.total}
       />
       <Text pt={2}>
-        {!!progress.total ? `Processing page ${progress.current} of ${progress.total}…` : 'Processing PDF…'}
+        {!!progress.total ? `${progress.type} page ${progress.current} of ${progress.total}…` : 'Processing PDF…'}
       </Text>
     </PageContent>
   );
