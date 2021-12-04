@@ -16,6 +16,7 @@ import {
 } from '@chakra-ui/react';
 import SEO from '../components/SEO';
 import FileUpload from '../components/FileUpload';
+import Footer from '../components/Footer';
 import pdfToImages from '../lib/pdfToImages';
 import OCRImages from '../lib/OCRImages';
 import { AiFillInfoCircle } from 'react-icons/ai';
@@ -94,6 +95,7 @@ const Home = () => {
             device.
           </Text>
         </Box>
+        <Footer />
       </PageContent>
     );
   }
@@ -111,6 +113,7 @@ const Home = () => {
             Upload Another
           </Button>
         </HStack>
+        <Footer />
       </PageContent>
     );
   }
