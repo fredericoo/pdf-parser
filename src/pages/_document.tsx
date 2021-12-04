@@ -17,6 +17,7 @@ class MyDocument extends Document {
           <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
           <link rel="icon" href="/favicon.png" />
+          <link rel="icon" href="/favicon.svg" />
           <link rel="apple-touch-icon" href="/favicon.png" />
         </Head>
         <body>
