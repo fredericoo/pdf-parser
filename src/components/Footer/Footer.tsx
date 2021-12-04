@@ -8,9 +8,10 @@ const Footer: React.VFC = () => {
       as="a"
       href="https://github.com/fredericoo/pdf-parser"
       target="_blank"
-      referrerPolicy="no-referrer"
+      rel="noreferrer"
       color="gray.400"
       _hover={{ color: 'gray.500' }}
+      aria-label="GitHub"
     >
       <Icon as={AiFillGithub} height="1.5rem" width="1.5rem" />
     </Text>

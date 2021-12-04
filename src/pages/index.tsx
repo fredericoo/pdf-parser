@@ -88,7 +88,7 @@ const Home = () => {
 
         <FileUpload onFileAccepted={handleFileSelect} />
 
-        <Box color="blue.500" display="flex" alignItems="center" borderRadius="md">
+        <Box color="blue.700" display="flex" alignItems="center" borderRadius="md">
           <Icon as={AiFillInfoCircle} mr={2} />
           <Text as="span">
             No data about your files is collected or stored. All the processing and text recognition happens on your

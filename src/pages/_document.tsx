@@ -4,7 +4,7 @@ import { ReactElement } from 'react';
 class MyDocument extends Document {
   render(): ReactElement {
     return (
-      <Html>
+      <Html lang="en-GB">
         <Head>
           <meta name="theme-color" content="#f0f0f0" />
           <meta name="copyright" content="@fredericoo on github" />
